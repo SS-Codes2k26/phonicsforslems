@@ -4,11 +4,12 @@ import { speakWord, speechSupported } from '../utils/speech'
 const LETTERS = ['A', 'B', 'C', 'D']
 
 export default function QuestionCard({ question, revealed }) {
-  const isListenOnly = question.type === 'audio-identify'
   const isIdentifyObject = question.type === 'identify-object'
+  const isAudioPrompt = question.format === 'audio'
+  const showEmoji = question.format === 'picture'
 
   useEffect(() => {
-    if (isListenOnly || question.format === 'audio-visual') {
+    if (isAudioPrompt) {
       const t = setTimeout(() => speakWord(question.word), 400)
       return () => clearTimeout(t)
     }
@@ -22,8 +23,9 @@ export default function QuestionCard({ question, revealed }) {
     }
   }, [revealed, question.id])
 
-  const showWord = !isListenOnly && !(isIdentifyObject && !revealed)
-  const showEmoji = question.format === 'picture-word' || isIdentifyObject
+  // The target word's text is never shown until the answer is revealed - showing it
+  // earlier would make multiple-choice/typing trivial (the answer would be right there).
+  const showWord = revealed
 
   return (
     <div className="question-card">
@@ -39,8 +41,8 @@ export default function QuestionCard({ question, revealed }) {
 
       {showEmoji && <div className="question-emoji">{question.emoji}</div>}
       {showWord && <div className="question-word">{question.word}</div>}
-      {isListenOnly && <div className="question-word question-word-hidden">🔊 Listen carefully!</div>}
-      {isIdentifyObject && !revealed && <div className="question-word question-word-hidden">What is this?</div>}
+      {isAudioPrompt && !revealed && <div className="question-word question-word-hidden">🔊 Listen carefully!</div>}
+      {showEmoji && !revealed && <div className="question-word question-word-hidden">What is this?</div>}
 
       {speechSupported() && !isIdentifyObject && (
         <button type="button" className="btn-speak" onClick={() => speakWord(question.word)}>

@@ -1,6 +1,9 @@
 import { wordsForTier } from '../data/wordBanks'
 
-const FORMATS = ['visual', 'audio-visual', 'picture-word']
+// The stimulus shown before an answer is locked in: a picture, or a spoken word.
+// The target word's text is never shown pre-answer - showing it would make
+// multiple-choice trivial (the answer would just be sitting in the question).
+const FORMATS = ['picture', 'audio']
 
 export const MAX_KID_TURNS = 3
 export const PASS_POINT_TIERS = [10, 8, 6, 4]
@@ -28,8 +31,12 @@ export function pickQuestion({ patterns, tier, questionTypes, usedWords }) {
   const target = pickRandom(candidates)
 
   const type = pickRandom(questionTypes)
-  // "Identify the Object" is always a picture-first pronunciation-practice format.
-  const format = type === 'identify-object' ? 'picture-word' : pickRandom(FORMATS)
+  // "Identify the Object" is always picture-first; "Listen & Choose" is always audio-first.
+  // Other types get a random stimulus for variety.
+  let format
+  if (type === 'identify-object') format = 'picture'
+  else if (type === 'audio-identify') format = 'audio'
+  else format = pickRandom(FORMATS)
 
   let options = null
   if (type === 'multiple-choice' || type === 'audio-identify' || type === 'identify-object') {
@@ -45,7 +52,7 @@ export function pickQuestion({ patterns, tier, questionTypes, usedWords }) {
     tier: target.tier,
     emoji: target.emoji,
     type, // 'multiple-choice' | 'typing' | 'audio-identify' | 'identify-object'
-    format, // 'visual' | 'audio-visual' | 'picture-word'
+    format, // 'picture' | 'audio' - the stimulus shown before answering
     options,
   }
 }
