@@ -347,6 +347,21 @@
   color: var(--ink-soft);
 }
 
+.question-sentence {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 4px 0 14px;
+}
+
+.sentence-answer {
+  color: var(--accent-dark);
+  background: #ffe3ea;
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
 .btn-speak {
   background: var(--accent2);
   color: #fff;

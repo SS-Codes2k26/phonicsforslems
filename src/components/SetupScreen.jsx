@@ -9,6 +9,7 @@ const QUESTION_TYPE_OPTIONS = [
   { id: 'multiple-choice', label: 'Multiple Choice' },
   { id: 'typing', label: 'Typing' },
   { id: 'audio-identify', label: 'Listen & Choose' },
+  { id: 'sentence', label: '📖 Finish the Sentence' },
 ]
 
 function makeDefaultTeams(count) {
@@ -28,7 +29,13 @@ export default function SetupScreen() {
   const [teams, setTeams] = useState(makeDefaultTeams(3))
   const [kidDrafts, setKidDrafts] = useState(Array(3).fill(''))
   const [questionsPerTeam, setQuestionsPerTeam] = useState(10)
-  const [questionTypes, setQuestionTypes] = useState(['identify-object', 'multiple-choice', 'typing', 'audio-identify'])
+  const [questionTypes, setQuestionTypes] = useState([
+    'identify-object',
+    'multiple-choice',
+    'typing',
+    'audio-identify',
+    'sentence',
+  ])
   const [startingTier, setStartingTier] = useState(1)
   const [showCumulative, setShowCumulative] = useState(false)
 

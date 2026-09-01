@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { speakWord, speechSupported } from '../utils/speech'
+import { speakWord, speakSentence, speechSupported } from '../utils/speech'
 
 const LETTERS = ['A', 'B', 'C', 'D']
 
 export default function QuestionCard({ question, revealed }) {
   const isIdentifyObject = question.type === 'identify-object'
+  const isSentence = question.type === 'sentence'
   const isAudioPrompt = question.format === 'audio'
   const showEmoji = question.format === 'picture'
 
@@ -25,7 +26,7 @@ export default function QuestionCard({ question, revealed }) {
 
   // The target word's text is never shown until the answer is revealed - showing it
   // earlier would make multiple-choice/typing trivial (the answer would be right there).
-  const showWord = revealed
+  const showWord = revealed && !isSentence
 
   return (
     <div className="question-card">
@@ -36,6 +37,7 @@ export default function QuestionCard({ question, revealed }) {
           {question.type === 'typing' && 'Type the Word'}
           {question.type === 'audio-identify' && 'Listen & Choose'}
           {question.type === 'identify-object' && '🖼️ Identify the Object'}
+          {isSentence && '📖 Finish the Sentence'}
         </span>
       </div>
 
@@ -44,9 +46,30 @@ export default function QuestionCard({ question, revealed }) {
       {isAudioPrompt && !revealed && <div className="question-word question-word-hidden">🔊 Listen carefully!</div>}
       {showEmoji && !revealed && <div className="question-word question-word-hidden">What is this?</div>}
 
-      {speechSupported() && !isIdentifyObject && (
+      {isSentence && (
+        <div className="question-sentence">
+          {revealed
+            ? question.sentence.split(new RegExp(`(${question.word})`, 'i')).map((part, i) =>
+                part.toLowerCase() === question.word.toLowerCase() ? (
+                  <strong key={i} className="sentence-answer">
+                    {part}
+                  </strong>
+                ) : (
+                  <span key={i}>{part}</span>
+                ),
+              )
+            : question.blankedSentence}
+        </div>
+      )}
+
+      {speechSupported() && !isIdentifyObject && !isSentence && (
         <button type="button" className="btn-speak" onClick={() => speakWord(question.word)}>
           🔊 Play Sound
+        </button>
+      )}
+      {isSentence && revealed && speechSupported() && (
+        <button type="button" className="btn-speak" onClick={() => speakSentence(question.sentence)}>
+          🔊 Play Sentence
         </button>
       )}
 

@@ -22,6 +22,11 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
+// Blanks out the target word in its example sentence for the pre-answer prompt.
+function blankSentence(sentence, word) {
+  return sentence.replace(new RegExp(`\\b${word}\\b`, 'i'), '_____')
+}
+
 // Builds one question given the active patterns, current difficulty tier, allowed
 // question types, and the words already used this session (to avoid repeats while pool allows).
 export function pickQuestion({ patterns, tier, questionTypes, usedWords }) {
@@ -31,15 +36,17 @@ export function pickQuestion({ patterns, tier, questionTypes, usedWords }) {
   const target = pickRandom(candidates)
 
   const type = pickRandom(questionTypes)
-  // "Identify the Object" is always picture-first; "Listen & Choose" is always audio-first.
-  // Other types get a random stimulus for variety.
+  // "Identify the Object" is always picture-first; "Listen & Choose" is always audio-first;
+  // "Finish the Sentence" always shows the blanked sentence. Other types get a random
+  // picture-or-audio stimulus for variety.
   let format
   if (type === 'identify-object') format = 'picture'
   else if (type === 'audio-identify') format = 'audio'
+  else if (type === 'sentence') format = 'sentence'
   else format = pickRandom(FORMATS)
 
   let options = null
-  if (type === 'multiple-choice' || type === 'audio-identify' || type === 'identify-object') {
+  if (type === 'multiple-choice' || type === 'audio-identify' || type === 'identify-object' || type === 'sentence') {
     const distractorPool = pool.filter((w) => w.word !== target.word)
     const distractors = shuffle(distractorPool).slice(0, 3)
     options = shuffle([target, ...distractors]).map((w) => w.word)
@@ -51,9 +58,11 @@ export function pickQuestion({ patterns, tier, questionTypes, usedWords }) {
     pattern: target.pattern,
     tier: target.tier,
     emoji: target.emoji,
-    type, // 'multiple-choice' | 'typing' | 'audio-identify' | 'identify-object'
-    format, // 'picture' | 'audio' - the stimulus shown before answering
+    type, // 'multiple-choice' | 'typing' | 'audio-identify' | 'identify-object' | 'sentence'
+    format, // 'picture' | 'audio' | 'sentence' - the stimulus shown before answering
     options,
+    sentence: target.sentence,
+    blankedSentence: type === 'sentence' ? blankSentence(target.sentence, target.word) : null,
   }
 }
 
